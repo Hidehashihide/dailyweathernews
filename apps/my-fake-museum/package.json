@@ -1,0 +1,32 @@
+{
+  "name": "my-fake-museum",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MY FAKE MUSEUM - collect junk, invent its history, get robbed at night.",
+  "author": "MY FAKE MUSEUM",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist-electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "sim": "tsx tests/sim/soak.ts",
+    "typecheck": "tsc --noEmit",
+    "electron:build": "npm run build && node scripts/build-electron.mjs",
+    "electron:dev": "npm run build && electron .",
+    "cap:sync": "npm run build && cap sync"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.8",
+    "fast-check": "^3.23.1",
+    "jsdom": "^25.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}
