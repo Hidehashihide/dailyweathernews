@@ -7,8 +7,10 @@
 PC・スマートフォン向けのダウンロード型アプリとして実装したもの。
 
 **現状**: v0.1.0 / 単一コードベースで Web・デスクトップ（Electron）・モバイル（Capacitor）に配布可能。
-テスト225件 + 実ブラウザE2E 18項目、コアのカバレッジ 97.8%。
+テスト225件 + E2E 34項目（ブラウザ / 単一HTML / Electron実機）、コアのカバレッジ 97.8%。
 検出・修正した不具合は [BUGS.md](./BUGS.md) に全件記載。
+
+> **すぐ遊びたい方へ** → [Mac で遊ぶ](./docs/PLAY-ON-MAC.md)（`MY-FAKE-MUSEUM.html` をダブルクリックするだけ）
 
 ---
 
@@ -47,6 +49,8 @@ npm run typecheck               # TypeScript 型検査（strict + noUncheckedInd
 npm test                        # ユニット / プロパティ / シミュレーション（225件）
 npm run test:cov                # カバレッジ（src/core 対象、しきい値 85%）
 npm run test:e2e                # 実ブラウザE2E（Chromium、ビルド込み）
+npm run test:standalone         # 単一HTMLを file:// から起動して検証
+npm run test:desktop            # Electron実機を起動して検証（要 xvfb / GUI）
 npm run test:all                # 上記すべて
 
 DAYS=1500 SEEDS=4 npm run sim   # 長時間ソーク（約36秒）
@@ -60,16 +64,26 @@ E2E は `PLAYWRIGHT_BROWSERS_PATH` 配下の Chromium を使う。
 
 ## 配布
 
+### 単一HTMLファイル（インストール不要）
+
+```bash
+npm run build:standalone     # → dist-standalone/MY-FAKE-MUSEUM.html（約56KB）
+```
+
+JS・CSS・アイコンを1ファイルにインライン化した自己完結版。ダブルクリックで遊べる。
+`file://` でも動くよう ES モジュールではなく IIFE で出力している。
+
 ### デスクトップ（Windows / macOS / Linux）
 
 ```bash
-npm i -D electron electron-builder   # 初回のみ（約200MB）
 npm run electron:dev                 # 開発起動
+npm run dist:mac:arm64               # → release/ に dmg（Apple Silicon）
+npm run dist:mac:x64                 # → release/ に dmg（Intel）
 npm run dist:win                     # → release/ に NSIS インストーラ
-npm run dist:mac                     # → release/ に dmg（x64 / arm64）
 npm run dist:linux                   # → release/ に AppImage + deb
 ```
 
+Mac での手順は [docs/PLAY-ON-MAC.md](./docs/PLAY-ON-MAC.md) に詳しく書いてある（Gatekeeper の対処を含む）。
 配布物への署名は各OSの証明書が必要（Windows: Authenticode、macOS: Developer ID + notarization）。
 `package.json` の `build` セクションに設定済み。
 

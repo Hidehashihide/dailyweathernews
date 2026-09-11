@@ -19,12 +19,17 @@
     "electron:dev": "npm run build && electron .",
     "cap:sync": "npm run build && cap sync",
     "test:e2e": "npm run build && node tests/e2e/smoke.mjs",
-    "test:all": "npm run typecheck && vitest run && npm run test:e2e",
+    "test:all": "npm run typecheck && vitest run && npm run test:e2e && npm run test:standalone",
     "dist:win": "npm run build && electron-builder --win --publish never",
     "dist:mac": "npm run build && electron-builder --mac --publish never",
     "dist:linux": "npm run build && electron-builder --linux --publish never",
     "cap:add:android": "npm run build && cap add android",
-    "cap:add:ios": "npm run build && cap add ios"
+    "cap:add:ios": "npm run build && cap add ios",
+    "build:standalone": "node scripts/build-standalone.mjs",
+    "test:standalone": "npm run build:standalone && node tests/e2e/standalone.mjs",
+    "test:desktop": "npm run build && xvfb-run -a node tests/e2e/desktop.mjs",
+    "dist:mac:arm64": "npm run build && electron-builder --mac --arm64 --publish never",
+    "dist:mac:x64": "npm run build && electron-builder --mac --x64 --publish never"
   },
   "devDependencies": {
     "@capacitor/android": "^6.2.0",
