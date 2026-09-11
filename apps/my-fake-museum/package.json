@@ -6,7 +6,7 @@
   "author": "MY FAKE MUSEUM",
   "license": "UNLICENSED",
   "type": "module",
-  "main": "dist-electron/main.cjs",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -16,17 +16,81 @@
     "test:cov": "vitest run --coverage",
     "sim": "tsx tests/sim/soak.ts",
     "typecheck": "tsc --noEmit",
-    "electron:build": "npm run build && node scripts/build-electron.mjs",
     "electron:dev": "npm run build && electron .",
-    "cap:sync": "npm run build && cap sync"
+    "cap:sync": "npm run build && cap sync",
+    "test:e2e": "npm run build && node tests/e2e/smoke.mjs",
+    "test:all": "npm run typecheck && vitest run && npm run test:e2e",
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "dist:mac": "npm run build && electron-builder --mac --publish never",
+    "dist:linux": "npm run build && electron-builder --linux --publish never",
+    "cap:add:android": "npm run build && cap add android",
+    "cap:add:ios": "npm run build && cap add ios"
   },
   "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/ios": "^6.2.0",
+    "@capacitor/preferences": "^6.0.3",
+    "@types/node": "^22.20.2",
     "@vitest/coverage-v8": "^2.1.8",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "fast-check": "^3.23.1",
     "jsdom": "^25.0.1",
+    "playwright": "^1.63.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"
+  },
+  "build": {
+    "appId": "com.myfakemuseum.game",
+    "productName": "MY FAKE MUSEUM",
+    "directories": {
+      "output": "release",
+      "buildResources": "resources"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.games",
+      "hardenedRuntime": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game"
+    }
   }
 }

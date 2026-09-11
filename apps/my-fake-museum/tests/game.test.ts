@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { apply, createGame, standings } from '../src/core/game';
 import type { Action } from '../src/core/game';
 import {
+  GUARDS,
   FORAGES_PER_DAY,
   MAX_INVENTORY,
   MAX_LOG,
@@ -382,5 +383,36 @@ describe('apply - rename', () => {
     const r = apply(createGame('shortname'), { type: 'rename', name: '館' });
     expect(r.ok).toBe(true);
     expect(r.state.player.name).toBe('館');
+  });
+});
+
+describe('guard duration matches what the shop advertises', () => {
+  it('a 3-day guard covers exactly three nights', () => {
+    // Regression: expiresOnDay was day + days, which sold a "3日" guard that
+    // protected four nights and displayed "あと4日" on the day of purchase.
+    let s = structuredClone(createGame('guard-days'));
+    s.player.money = 10_000;
+    const startDay = s.day;
+    s = apply(s, { type: 'buyGuard', tier: 'pro' }).state;
+    expect(s.player.guard!.expiresOnDay).toBe(startDay + 2);
+
+    let covered = 0;
+    for (let i = 0; i < 6; i++) {
+      if (s.player.guard && s.player.guard.expiresOnDay >= s.day) covered += 1;
+      s = run(s, { type: 'openMuseum' }, { type: 'endNight' });
+    }
+    expect(covered).toBe(3);
+    expect(s.player.guard).toBeNull();
+  });
+
+  it('every guard tier delivers the advertised number of days', () => {
+    for (const tier of ['volunteer', 'pro', 'elite'] as const) {
+      const def = GUARDS.find((g) => g.tier === tier)!;
+      let s = structuredClone(createGame(`dur-${tier}`));
+      s.player.money = 10_000;
+      s = apply(s, { type: 'buyGuard', tier }).state;
+      const daysLeft = s.player.guard!.expiresOnDay - s.day + 1;
+      expect(daysLeft, tier).toBe(def.days);
+    }
   });
 });

@@ -11,7 +11,7 @@
 
 import { caseDef } from './content';
 import { realVoteChance } from './caption';
-import { addAuthority, addBuzz, addMoney, clampStat, safeInt } from './economy';
+import { addAuthority, addBuzz, addMoney, clampMoney, clampStat, safeInt } from './economy';
 import type { Museum } from './types';
 import type { Rng } from './rng';
 
@@ -93,14 +93,16 @@ export function settleDetailed(museum: Museum, rng: Rng): SettlementResult {
       const tip = Math.round(baseTip(rng) * exhibitMultiplier(museum, index));
       const safeTip = safeInt(tip);
       tips += safeTip;
-      exhibit.tipsEarned = safeInt(exhibit.tipsEarned + safeTip);
+      // Clamped with the same ceiling the save validator uses, so a long game
+      // cannot drift between the live value and the reloaded one.
+      exhibit.tipsEarned = clampMoney(exhibit.tipsEarned + safeTip);
 
       if (rng.chance(realVoteChance(exhibit.score))) {
-        exhibit.votesReal += 1;
+        exhibit.votesReal = clampStat(exhibit.votesReal + 1);
         votesReal += 1;
         authorityGained += exhibit.score.authorityGain > 0 ? 1 : 0;
       } else {
-        exhibit.votesFake += 1;
+        exhibit.votesFake = clampStat(exhibit.votesFake + 1);
         votesFake += 1;
         buzzGained += exhibit.score.buzzGain > 0 ? 1 : 0;
       }

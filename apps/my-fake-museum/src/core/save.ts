@@ -20,7 +20,7 @@ import {
   STARTING_SLOTS,
 } from './content';
 import { scoreCaption } from './caption';
-import { clampMoney, clampStat, safeInt } from './economy';
+import { clampMoney, clampStat, clampTotal, safeInt } from './economy';
 import { SAVE_VERSION } from './types';
 import type {
   CaseTier,
@@ -327,13 +327,14 @@ export function loadGame(json: string): LoadResult {
       }))
       .slice(-MAX_REPORTS),
     relic: relic && relic.defId !== '' ? relic : null,
+    // Lifetime counters use MAX_TOTAL, not MAX_STAT: see economy.ts.
     totals: {
-      tips: clampMoney(num(totalsRaw['tips'], 0)),
-      visitors: clampStat(num(totalsRaw['visitors'], 0)),
-      exhibitsPlaced: clampStat(num(totalsRaw['exhibitsPlaced'], 0)),
-      itemsStolen: clampStat(num(totalsRaw['itemsStolen'], 0)),
-      itemsLost: clampStat(num(totalsRaw['itemsLost'], 0)),
-      daysPlayed: clampStat(num(totalsRaw['daysPlayed'], 0)),
+      tips: clampTotal(num(totalsRaw['tips'], 0)),
+      visitors: clampTotal(num(totalsRaw['visitors'], 0)),
+      exhibitsPlaced: clampTotal(num(totalsRaw['exhibitsPlaced'], 0)),
+      itemsStolen: clampTotal(num(totalsRaw['itemsStolen'], 0)),
+      itemsLost: clampTotal(num(totalsRaw['itemsLost'], 0)),
+      daysPlayed: clampTotal(num(totalsRaw['daysPlayed'], 0)),
     },
     settings: {
       moderation: isObject(data['settings']) ? data['settings']['moderation'] !== false : true,

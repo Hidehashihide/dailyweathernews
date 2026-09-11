@@ -106,7 +106,8 @@ function upgrade(rival: RivalMuseum, rng: Rng, day: number): void {
     const affordable = GUARDS.filter((g) => g.tier !== 'none' && g.price <= rival.money);
     const choice = affordable[affordable.length - 1];
     if (choice && rng.chance(0.5 + rival.skill * 0.3) && spend(rival, choice.price)) {
-      rival.guard = { tier: choice.tier, expiresOnDay: day + choice.days };
+      // Inclusive of today -- see the same calculation in game.ts buyGuard.
+      rival.guard = { tier: choice.tier, expiresOnDay: day + choice.days - 1 };
     }
   }
 

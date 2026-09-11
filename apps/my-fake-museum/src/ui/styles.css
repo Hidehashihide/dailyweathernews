@@ -1,0 +1,524 @@
+/*
+ * One stylesheet, mobile-first.
+ *
+ * Layout targets a 360px phone and scales up; nothing has a min-width wider
+ * than the screen. Tap targets are >= 44px tall. Safe-area insets are honoured
+ * so the bottom row is not eaten by the iOS home indicator.
+ */
+
+:root {
+  --bg: #14110e;
+  --bg-panel: #1e1a16;
+  --bg-card: #262019;
+  --line: #3a3028;
+  --ink: #f2ece3;
+  --ink-dim: #a89b8c;
+  --gold: #d8a657;
+  --gold-dim: #8a6b38;
+  --red: #d46a5a;
+  --green: #7fa66a;
+  --radius: 10px;
+  --pad: 12px;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --bg: #f4efe6;
+    --bg-panel: #ffffff;
+    --bg-card: #fbf7f0;
+    --line: #ddd2c0;
+    --ink: #241f19;
+    --ink-dim: #6d6154;
+    --gold: #8a6b1f;
+    --gold-dim: #b49a63;
+    --red: #a8402f;
+    --green: #4a6b38;
+    color-scheme: light;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic',
+    system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  /* Stop iOS from bouncing the whole page while a panel scrolls. */
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+#app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 24px);
+  min-height: 100dvh;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  padding: var(--pad);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-panel);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.day {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.phase {
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: 6px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 8px;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.stat.money .stat-value {
+  color: var(--gold);
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px var(--pad);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-panel);
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+
+.tab {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-dim);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab-active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1b1510;
+}
+
+/* ---------- panels ---------- */
+
+.panel {
+  padding: var(--pad);
+}
+
+.panel h2 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.panel h3 {
+  font-size: 14px;
+  margin: 16px 0 8px;
+  color: var(--ink-dim);
+}
+
+.actions,
+.card-actions,
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.btn {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  /* Kill the 300ms tap delay and the grey flash on iOS. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--gold-dim);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1b1510;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-dim);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.btn-relic {
+  background: transparent;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.btn-wide {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* ---------- cards ---------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 620px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--pad);
+  min-width: 0;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.emoji {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.card-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.caption {
+  margin: 6px 0;
+  font-size: 14px;
+  line-height: 1.7;
+  /* Player text can be one long unbroken run; never let it widen the card. */
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.caption-muted {
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
+.rarity {
+  font-size: 12px;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+}
+
+.placard {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--red);
+  border-left: 3px solid var(--red);
+  padding: 4px 8px;
+  margin: 8px 0;
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.placard-label {
+  font-weight: 700;
+}
+
+.meta,
+.votes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chip-tip {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+}
+
+.tag {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.tag-genuine {
+  background: var(--gold);
+  color: #1b1510;
+  font-weight: 700;
+}
+
+/* ---------- editor ---------- */
+
+.editor {
+  margin-top: 10px;
+}
+
+.caption-input {
+  width: 100%;
+  min-height: 88px;
+  padding: 10px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--ink);
+  /* 16px prevents iOS Safari from zooming the viewport on focus. */
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.counter {
+  font-size: 12px;
+  color: var(--ink-dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  margin: 4px 0 8px;
+}
+
+.counter.over {
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* ---------- misc ---------- */
+
+.report {
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius);
+  padding: var(--pad);
+  margin-bottom: 12px;
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+}
+
+.report h3 {
+  margin: 0 0 4px;
+  color: var(--gold);
+}
+
+.report p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.empty {
+  color: var(--ink-dim);
+  font-size: 14px;
+  padding: 16px 0;
+}
+
+.standings {
+  margin-top: 18px;
+}
+
+.standing {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.standing-you {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.log-line {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.log-day {
+  color: var(--ink-dim);
+  flex: 0 0 44px;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-robbed,
+.log-heist_blocked {
+  color: var(--red);
+}
+
+.log-heist_success,
+.log-relic {
+  color: var(--gold);
+}
+
+.totals {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.totals p {
+  margin: 2px 0;
+}
+
+.muted {
+  opacity: 0.7;
+}
+
+.banner {
+  margin: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.banner-error {
+  border: 1px solid var(--red);
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom) + 16px);
+  max-width: min(92vw, 420px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  z-index: 50;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 35%);
+  overflow-wrap: anywhere;
+}
+
+.toast-ok {
+  background: var(--green);
+  color: #10160c;
+}
+
+.toast-bad {
+  background: var(--red);
+  color: #1a0c0a;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    animation: rise 180ms ease-out;
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+    }
+  }
+}

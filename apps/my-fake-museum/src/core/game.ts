@@ -34,7 +34,7 @@ import {
 } from './content';
 import { scoreCaption } from './caption';
 import { settleDetailed, settleFast } from './appraisal';
-import { addBuzz, addFame, addMoney, clampStat, decayBuzz, spend } from './economy';
+import { addBuzz, addFame, addMoney, clampStat, clampTotal, decayBuzz, spend } from './economy';
 import { attemptHeist } from './heist';
 import { mintId } from './ids';
 import { moderateCaption, explainReason } from './moderation';
@@ -238,7 +238,7 @@ export function apply(prev: GameState, action: Action): ActionResult {
       };
       player.inventory.splice(index, 1);
       player.exhibits.push(exhibit);
-      state.totals.exhibitsPlaced += 1;
+      state.totals.exhibitsPlaced = clampTotal(state.totals.exhibitsPlaced + 1);
 
       const def = junkDefOrFallback(item.defId);
       pushLog(state, 'exhibit', `${def.emoji} ${def.name} を展示した。`);
@@ -330,8 +330,12 @@ export function apply(prev: GameState, action: Action): ActionResult {
       if (!target || target.tier === 'none') return fail(state, 'その警備はありません。');
       if (!spend(player, target.price)) return fail(state, `所持金が足りません（${target.price}）。`);
 
+      // `days` is inclusive of today: a 3-day guard covers tonight and the next
+      // two nights, so the last covered day is day + days - 1. Using
+      // `day + days` sold a "3日" guard that actually lasted four nights and
+      // displayed "あと4日" the moment it was bought.
       // Re-hiring before expiry extends from today, it does not stack forever.
-      player.guard = { tier: target.tier, expiresOnDay: state.day + target.days };
+      player.guard = { tier: target.tier, expiresOnDay: state.day + target.days - 1 };
       pushLog(state, 'purchase', `${target.name} を雇った（-${target.price}）。`);
       return commit(true, `${target.name} を雇った。`);
     }
@@ -420,8 +424,8 @@ export function apply(prev: GameState, action: Action): ActionResult {
         state.reports.splice(0, state.reports.length - MAX_REPORTS);
       }
 
-      state.totals.tips += result.tips;
-      state.totals.visitors += result.visitors;
+      state.totals.tips = clampTotal(state.totals.tips + result.tips);
+      state.totals.visitors = clampTotal(state.totals.visitors + result.visitors);
       state.phase = 'night';
 
       pushLog(
@@ -446,7 +450,7 @@ export function apply(prev: GameState, action: Action): ActionResult {
       switch (result.outcome) {
         case 'stolen': {
           const def = junkDefOrFallback(result.defId ?? '');
-          state.totals.itemsStolen += 1;
+          state.totals.itemsStolen = clampTotal(state.totals.itemsStolen + 1);
           if (currentReport) currentReport.stolenCount += 1;
           pushLog(state, 'heist_success', `${rival.name} から ${def.name} を盗んだ。`);
           return commit(true, `${def.name} を盗んだ。`);
@@ -482,7 +486,7 @@ export function apply(prev: GameState, action: Action): ActionResult {
 
         if (result.outcome === 'stolen') {
           robbed += 1;
-          state.totals.itemsLost += 1;
+          state.totals.itemsLost = clampTotal(state.totals.itemsLost + 1);
           const def = junkDefOrFallback(result.defId ?? '');
           pushLog(state, 'robbed', `${rival.name} に ${def.name} を盗まれた。`);
         } else if (result.outcome === 'blocked') {
@@ -498,7 +502,7 @@ export function apply(prev: GameState, action: Action): ActionResult {
       for (const rival of state.rivals) decayBuzz(rival);
 
       state.day += 1;
-      state.totals.daysPlayed += 1;
+      state.totals.daysPlayed = clampTotal(state.totals.daysPlayed + 1);
       state.phase = 'morning';
       player.foragesLeft = FORAGES_PER_DAY;
       player.heistsLeft = HEISTS_PER_NIGHT;

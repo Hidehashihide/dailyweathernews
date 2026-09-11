@@ -6,3 +6,4 @@ coverage/
 android/
 ios/
 *.local
+tests/e2e/screenshot-*.png

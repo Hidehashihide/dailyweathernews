@@ -11,7 +11,17 @@ import type { Museum } from './types';
 
 /** Above this, further gains are clamped. Keeps numbers printable and safe. */
 export const MAX_MONEY = 9_999_999;
+/** Ceiling for *current* museum stats (authority, buzz, fame, per-exhibit votes). */
 export const MAX_STAT = 99_999;
+/**
+ * Ceiling for *lifetime* counters (total visitors, total tips, items stolen).
+ *
+ * These are cumulative and legitimately outgrow MAX_STAT: a few hundred days
+ * of play passes 99,999 visitors. Clamping them at MAX_STAT froze the stats
+ * screen and, worse, made the in-memory value disagree with the reloaded one,
+ * so a save round-trip silently changed state.
+ */
+export const MAX_TOTAL = 999_999_999;
 
 /** Coerce anything to a finite, non-negative integer. */
 export function safeInt(value: number, fallback = 0): number {
@@ -26,6 +36,11 @@ export function clampMoney(value: number): number {
 
 export function clampStat(value: number): number {
   return Math.min(safeInt(value), MAX_STAT);
+}
+
+/** Clamp a lifetime counter. Must be used on both the write and the load path. */
+export function clampTotal(value: number): number {
+  return Math.min(safeInt(value), MAX_TOTAL);
 }
 
 /** Add (or subtract) money. Never goes below zero. Returns the new balance. */
