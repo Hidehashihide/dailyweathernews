@@ -73,10 +73,30 @@ JST 6:00 の実行が前日付のファイルになり、本文も前日の天�
 実際に毎朝実行されるプロンプトは [`docs/boyaki-cho-prompt.md`](./boyaki-cho-prompt.md) に保存している。
 Routine を作り直す場合はこのファイルの内容をそのまま貼り付ける。
 
-## 既知の制約
+## 実行の仕組みと既知の制約
 
-- `create_trigger` API では、この組織で `connectors` パラメータが利用できない。
-  そのため API 経由で作成した Routine には Notion コネクタが紐づかず、
-  発火したセッションから Notion に書き込めない可能性がある。
-  確実に Notion へ投稿するには、claude.ai の Routines 画面から
-  **Notion コネクタを有効にした状態で** Routine を作成する必要がある。
+### API からはコネクタを付けられない
+
+`create_trigger` API は、この組織では `connectors` パラメータが利用できない
+（`the connectors parameter is not available for this organization`）。
+そのため API 経由で作成した「新規セッションを起動する Routine」には Notion コネクタが紐づかず、
+発火したセッションに `mcp__Notion__*` ツールが一切存在しない（検証用 Routine を実際に発火させて確認済み）。
+
+### 現在の運用：セッション常駐方式
+
+代替として、**Notion コネクタを保持しているセッションを毎朝起こす** Routine を使っている。
+
+| Routine | ID | 状態 |
+| --- | --- | --- |
+| ボヤき帳 6:00JST（セッションを起こす） | `trig_012iqDsiPN6rgFM549aeguBU` | 稼働中 |
+| ボヤき帳（新規セッション版） | `trig_01SSrtk86YH2mLHfci1eq29j` | 停止中（予備） |
+| 旧・朝のまとめ | `trig_01AKrg4MAZEsNCYA1BrK7AMW` | 要・手動停止 |
+
+この方式の弱点は、**対象セッションが失われると連載が止まる**こと。
+セッションはいずれ回収されるため、恒久的な運用には次の「本来の解決策」が必要。
+
+### 本来の解決策
+
+claude.ai の Routines 画面から、**Notion コネクタを有効にした状態で** Routine を新規作成する。
+貼り付けるプロンプトは [`docs/boyaki-cho-prompt.md`](./boyaki-cho-prompt.md) にある。
+作成できたら、上表の Routine はすべて削除してよい。
